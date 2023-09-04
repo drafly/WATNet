@@ -416,13 +416,11 @@ class enhance_net_litr(nn.Module):
 
     def __init__(self, opt):
         super(enhance_net_litr, self).__init__()
-
-        self.channels = opt.input_nc
         self.relu = nn.ReLU(inplace=False)
 
-        self.e_conv1 = nn.Conv2d(3, opt.number_f // 2, 2, 3, 1, 1, bias=True)  # 输入的通道数改为1
+        self.relu = nn.Conv2d(3, opt.number_f // 2, 2, 3, 1, 1, bias=True)  # 输入的通道数改为1
 
-        self.max_block = MaxViTTransformerBlock(in_channels= opt.input_nc ,partition_function= grid_partition,reverse_function=grid_reverse,
+        self.relu = MaxViTTransformerBlock(in_channels= opt.input_nc ,partition_function= grid_partition,reverse_function=grid_reverse,
             num_heads=1, #32
             grid_window_size=(8,8), #(7,7)
             attn_drop=0.,
@@ -432,13 +430,11 @@ class enhance_net_litr(nn.Module):
             act_layer=nn.GELU,
             norm_layer= nn.LayerNorm )
 
-
-
         self.mir_block = MIRNet_v2(opt.mir_inp_channels, opt.mir_out_channels, opt.mir_n_feat, opt.mir_chan_factor,
                                    opt.mir_n_RRG,
                                    opt.mir_n_MRB, opt.mir_height, opt.mir_width, opt.mir_scale)
-
-        self.maxpool = nn.MaxPool2d(2, stride=2, return_indices=False, ceil_mode=False)
+        
+        self.relu = nn.ReLU(inplace=False)
 
         print("--------------------------------------------------------------------------------------")
 
