@@ -6,7 +6,7 @@ import torch.optim
 import os
 import time
 import torch.nn.functional as F
-from dataloaders.dataloader_FiveK import EnhanceDataset_LOL,EnhanceDataset_LOLv2
+from dataloaders.dataloader_FiveK import EnhanceDataset_LOL,EnhanceDataset_MIT,EnhanceDataset_UPE
 from util import calculate_ssim, calculate_psnr, tensor2img, draw_picture,torchPSNR,torchSSIM
 from options.train_options import TrainOptions
 
@@ -26,20 +26,20 @@ plt.switch_backend('agg')
 
 #设置cuda的设备是卡二
 #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-os.environ["WANDB_API_KEY"] = "ddb077507e906943a5ddac28eef74ee82ee18b07"
-wandb.init(
+def set_wandb(seed):
+    os.environ["WANDB_API_KEY"] = "ddb077507e906943a5ddac28eef74ee82ee18b07"
+    wandb.init(
   # set the wandb project where this run will be logged
-  project="LOLv2",      
+      project="MIT",      
 
   # track hyperparameters and run metadata
-  config={
-      "learning_rate": 1e-3,
-      "architecture": "半个MRB",
-      "dataset": "LOLv2",
+      config={
+      "learning_rate": 5e-4,
+      "architecture": "HWAB",
+      "dataset": "MIT",
       "epochs": 300,
-  }
-)
-
+      }
+    )
 
 def fix_random_seed(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -170,15 +170,17 @@ def train(config):
 
                 with torch.no_grad():
                     enhanced_image, x_r = DCE_net(img_input)
-
+                    
+                
+                
                 for i in range(img_input.shape[0]):
                     pytorch_psnr = torchPSNR(enhanced_image[i],img_ref[i])
                     pytorch_ssim = torchSSIM(enhanced_image,img_ref)
                     count += 1
                     img_idx +=1
-                    psnr_sum += pytorch_psnr
                     ssim_sum += pytorch_ssim
-            
+                    psnr_sum += pytorch_psnr
+                    
                     if  config.save_img : #config.save_img:
                         torchvision.utils.save_image(enhanced_image[i],'{}/results/{}_out.png'.format(config.snapshots_folder, img_idx))
                         torchvision.utils.save_image(img_ref[i],'{}/results/{}_gt.png'.format(config.snapshots_folder, img_idx))
@@ -225,25 +227,27 @@ def train(config):
 
 
 if __name__ == "__main__":
+    set_wandb(0)
+    
     option =TrainOptions().parse()
     models.MODEL_REGISTRY[option.model]
     config_eval = copy.copy(option)
 
     ####
-    fix_random_seed(2022)
+    fix_random_seed(2023)
 
     ###
-    train_dataset = EnhanceDataset_LOLv2(option.images_path, option.image_h, image_size_w=option.image_w)
+    train_dataset = EnhanceDataset_UPE(option.images_path, option.image_h, image_size_w=option.image_w,mode="train")
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=option.train_batch_size, shuffle=False, num_workers=option.num_workers,
         pin_memory=True, drop_last=False)
     print("train_loader load finished ",len(train_dataset) )
 
-    eval_dataset = EnhanceDataset_LOLv2(
+    eval_dataset = EnhanceDataset_UPE(
         config_eval.images_val_path,
-        config_eval.image_h, config_eval.image_w, resize=False)
+        config_eval.image_h, config_eval.image_w,mode="test")
     eval_loader = torch.utils.data.DataLoader(
-        eval_dataset, batch_size=config_eval.val_batch_size, shuffle=False, num_workers=1,
+        eval_dataset, batch_size=config_eval.val_batch_size, shuffle=False, num_workers=option.num_workers,
         pin_memory=False, drop_last=False)
     print("eval_loader load finished ",len(eval_dataset) )
 
