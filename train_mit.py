@@ -26,20 +26,6 @@ plt.switch_backend('agg')
 
 #设置cuda的设备是卡二
 #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-def set_wandb(seed):
-    os.environ["WANDB_API_KEY"] = "ddb077507e906943a5ddac28eef74ee82ee18b07"
-    wandb.init(
-  # set the wandb project where this run will be logged
-      project="MIT",      
-
-  # track hyperparameters and run metadata
-      config={
-      "learning_rate": 5e-4,
-      "architecture": "HWAB",
-      "dataset": "MIT",
-      "epochs": 300,
-      }
-    )
 
 def fix_random_seed(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -227,7 +213,7 @@ def train(config):
 
 
 if __name__ == "__main__":
-    set_wandb(0)
+    #set_wandb(0)
     
     option =TrainOptions().parse()
     models.MODEL_REGISTRY[option.model]
