@@ -55,5 +55,15 @@ The shell files mentioned above have some options to config , such as:
 you should modify the path to make it suitable for your environment.
 
 
-
+## citation
+<pre><code>
+@inproceedings{wang2023watnet,
+  title={WATNet: A Wavelet-Aware Lightweight Hybrid Model for Fast Low-Light Enhancement},
+  author={Wang, Qiangqiang and Huang, Peiliang and Li, Lei and Han, Longfei},
+  booktitle={2023 7th Asian Conference on Artificial Intelligence Technology (ACAIT)},
+  pages={1556--1564},
+  year={2023},
+  organization={IEEE}
+}
+</code></pre>
 
